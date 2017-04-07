@@ -294,15 +294,30 @@ function icalfeeds_feed() {
     $events = null;
 
     foreach ($posts as $post) {
-
-        $start_time = date( 'Ymd\THis', get_post_time( 'U', false, $post->ID ) );
-        $end_time = date( 'Ymd\THis', get_post_time( 'U', false, $post->ID ) + ($options['icalfeeds_minutes'] * 60));
+	$event_begin = strtotime(get_post_meta( $post->ID, 'event_begin', true ));
+	$event_end = strtotime(get_post_meta( $post->ID, 'event_end', true ));
+	if($event_begin === false || $event_end === false){
+		continue;
+	}
+        $start_time = date( 'Ymd\THis', $event_begin );
+        $end_time = date( 'Ymd\THis', $event_end );
         $modified_time = date( 'Ymd\THis', get_post_modified_time( 'U', false, $post->ID ) );
         $summary = strip_tags($post->post_title);
         $permalink = get_permalink($post->ID);
         $timezone = get_option('timezone_string');
         $guid = get_the_guid($post->ID);
+	$address = get_post_meta( $post->ID, 'geo_address', true );
+	$location = '';
+	if(!empty($address)){
+		$location = $address;
+	}
 
+	$lat = get_post_meta( $post->ID, 'geo_latitude', true );
+	$lng = get_post_meta( $post->ID, 'geo_longitude', true );
+	$geo = '';
+	if(!empty($lat) && !empty($lng)){
+		$geo = $lat.';'.$lng;
+	}
         if ($timezone == 'UTC') {
             $start_time = ":$start_time" . 'Z';
             $end_time = ":$end_time" . 'Z';
@@ -320,6 +335,8 @@ DTSTAMP$modified_time
 DTSTART$start_time
 DTEND$end_time
 SUMMARY:$summary
+LOCATION:$location
+GEO:$geo
 URL;VALUE=URI:$permalink
 END:VEVENT
 
@@ -331,7 +348,7 @@ EVENT;
     $blog_url = get_bloginfo('home');
 
     header('Content-Type: text/calendar; charset=utf-8');
-    header('Content-Disposition: attachment; filename="blog_posts.ics"');
+    header('Content-Disposition: attachment; filename="fsr-info-event.ics"');
 
     $content = <<<CONTENT
 BEGIN:VCALENDAR
