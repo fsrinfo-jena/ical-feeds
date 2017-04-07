@@ -1,1 +1,20 @@
-array(9) { ["_edit_lock"]=> array(1) { [0]=> string(12) "1491478717:1" } ["_edit_last"]=> array(1) { [0]=> string(1) "4" } ["_thumbnail_id"]=> array(1) { [0]=> string(3) "604" } ["event_color"]=> array(1) { [0]=> string(6) "56db1b" } ["event_begin"]=> array(1) { [0]=> string(19) "2017-04-11 16:15:00" } ["event_end"]=> array(1) { [0]=> string(19) "2017-04-11 22:15:00" } ["geo_address"]=> array(1) { [0]=> string(38) "Jena Rasenmühleninsel im Paradiespark" } ["geo_latitude"]=> array(1) { [0]=> string(17) "50.92169641844089" } ["geo_longitude"]=> array(1) { [0]=> string(18) "11.583194732666014" } } string(19) "2017-04-11 22:15:00"
+array(9) {
+["_edit_lock"]=> array(1) {
+[0]=> string(12) "1491478717:1" }
+["_edit_last"]=> array(1) {
+[0]=> string(1) "4" }
+["_thumbnail_id"]=> array(1) {
+[0]=> string(3) "604" }
+["event_color"]=> array(1) {
+[0]=> string(6) "56db1b" }
+["event_begin"]=> array(1) {
+[0]=> string(19) "2017-04-11 16:15:00" }
+["event_end"]=> array(1) {
+[0]=> string(19) "2017-04-11 22:15:00" }
+["geo_address"]=> array(1) {
+[0]=> string(38) "Jena Rasenmühleninsel im Paradiespark" }
+["geo_latitude"]=> array(1) {
+[0]=> string(17) "50.92169641844089" }
+["geo_longitude"]=> array(1) {
+[0]=> string(18) "11.583194732666014" }
+}
