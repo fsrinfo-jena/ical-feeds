@@ -294,50 +294,65 @@ function icalfeeds_feed() {
     $events = null;
 
     foreach ($posts as $post) {
-	$event_begin = strtotime(get_post_meta( $post->ID, 'event_begin', true ));
-	$event_end = strtotime(get_post_meta( $post->ID, 'event_end', true ));
-	if($event_begin === false || $event_end === false){
-		continue;
-	}
-        $start_time = date( 'Ymd\THis', $event_begin );
-        $end_time = date( 'Ymd\THis', $event_end );
-        $modified_time = date( 'Ymd\THis', get_post_modified_time( 'U', false, $post->ID ) );
-        $summary = strip_tags($post->post_title);
-        $permalink = get_permalink($post->ID);
-        $timezone = get_option('timezone_string');
-        $guid = get_the_guid($post->ID);
-	$address = get_post_meta( $post->ID, 'geo_address', true );
-	$location = '';
-	if(!empty($address)){
-		$location = $address;
-	}
 
-	$lat = get_post_meta( $post->ID, 'geo_latitude', true );
-	$lng = get_post_meta( $post->ID, 'geo_longitude', true );
-	$geo = '';
-	if(!empty($lat) && !empty($lng)){
-		$geo = $lat.';'.$lng;
-	}
-        if ($timezone == 'UTC') {
-            $start_time = ":$start_time" . 'Z';
-            $end_time = ":$end_time" . 'Z';
-            $modified_time = ":$modified_time" . 'Z';
-        } else {
-            $start_time = ";TZID=$timezone:$start_time";
-            $end_time = ";TZID=$timezone:$end_time";
-            $modified_time = ";TZID=$timezone:$modified_time";
+        //get meta-data and timezone_string before changing the default_timezone in order to avoid side effects
+        $event_begin = get_post_meta( $post->ID, 'event_begin', true );
+        $event_end = get_post_meta( $post->ID, 'event_end', true );
+        $modified_time = get_post_modified_time( 'U', false, $post->ID ); //timestamp
+        $timezone = get_option('timezone_string');
+
+        //save current timezone for later restore (should be UTC)
+        $tmp = date_default_timezone_get();
+
+        /*
+         * set default_timezone to match that one set in the WP timezone_string because it is the correct one for the post-meta and we need that 
+         * one to get a correct UNIX-timetamp from strtotime, since it obviously assumes the current default_timezone to be the correct one for datetime-strings 
+         * that don't contain a timezone-part
+         */
+        date_default_timezone_set($timezone);
+
+	    $event_begin = strtotime($event_begin);
+	    $event_end = strtotime($event_end);
+
+        //restore the originally set default_timezone in order the avoid affecting other code (should be UTC)
+        date_default_timezone_set($tmp);
+
+	    if($event_begin === false || $event_end === false){
+		    continue;
+	    }
+
+        //since we correctly calculated the UNIX-timstamp we are now able to format the output-strings as UTC
+        $ics_start_time = date( '\:Ymd\THis\Z', $event_begin );
+        $ics_end_time = date( '\:Ymd\THis\Z', $event_end);
+        $ics_modified_time = date( '\:Ymd\THis\Z', $modified_time);
+
+        $ics_summary = strip_tags($post->post_title);
+        $ics_permalink = get_permalink($post->ID);
+        $ics_guid = get_the_guid($post->ID);
+
+        $address = get_post_meta( $post->ID, 'geo_address', true );
+        $ics_location = '';
+        if(!empty($address)){
+            $ics_location = $address;
         }
 
+        $lat = get_post_meta( $post->ID, 'geo_latitude', true );
+        $lng = get_post_meta( $post->ID, 'geo_longitude', true );
+        $ics_geo = '';
+        if(!empty($lat) && !empty($lng)){
+            $ics_geo = $lat.';'.$lng;
+        }
+ 
         $events .= <<<EVENT
 BEGIN:VEVENT
-UID:$guid
-DTSTAMP$modified_time
-DTSTART$start_time
-DTEND$end_time
-SUMMARY:$summary
-LOCATION:$location
-GEO:$geo
-URL;VALUE=URI:$permalink
+UID:$ics_guid
+DTSTAMP$ics_modified_time
+DTSTART$ics_start_time
+DTEND$ics_end_time
+SUMMARY:$ics_summary
+LOCATION:$ics_location
+GEO:$ics_geo
+URL;VALUE=URI:$ics_permalink
 END:VEVENT
 
 EVENT;
